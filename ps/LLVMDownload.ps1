@@ -68,19 +68,20 @@ Write-Host "LLVM release: $release"
 DownloadFile -Version $release -Name "llvm"
 DownloadFile -Version $release -Name "cfe"
 DownloadFile -Version $release -Name "lld"
+DownloadFile -Version $release -Name "lldb"
+DownloadFile -Version $release -Name "clang-tools-extra"
 DownloadFile -Version $release -Name "compiler-rt"
 DownloadFile -Version $release -Name "libcxx"
-DownloadFile -Version $release -Name "clang-tools-extra"
-DownloadFile -Version $release -Name "lldb"
+DownloadFile -Version $release -Name "libcxxabi"
 
 UnpackFile -File "$PWD/llvm.tar.xz" -Path "." -OldName "llvm-$release.src" -Name "llvm"
 UnpackFile -File "$PWD/cfe.tar.xz" -Path "llvm/tools" -OldName "cfe-$release.src" -Name "clang"
-UnpackFile -File "$PWD/clang-tools-extra.tar.xz" -Path "llvm/tools/clang/tools" -OldName "clang-tools-extra-$release.src" -Name "extra"
 UnpackFile -File "$PWD/lld.tar.xz" -Path "llvm/tools" -OldName "lld-$release.src" -Name "lld"
+UnpackFile -File "$PWD/lldb.tar.xz" -Path "llvm/tools" -OldName "lldb-$release.src" -Name "lldb"
+UnpackFile -File "$PWD/clang-tools-extra.tar.xz" -Path "llvm/tools/clang/tools" -OldName "clang-tools-extra-$release.src" -Name "extra"
 UnpackFile -File "$PWD/compiler-rt.tar.xz" -Path "llvm/projects" -OldName "compiler-rt-$release.src" -Name "compiler-rt"
 UnpackFile -File "$PWD/libcxx.tar.xz" -Path "llvm/projects" -OldName "libcxx-$release.src" -Name "libcxx"
-UnpackFile -File "$PWD/lldb.tar.xz" -Path "llvm/tools" -OldName "lldb-$release.src" -Name "lldb"
-
+UnpackFile -File "$PWD/libcxxabi.tar.xz" -Path "llvm/projects" -OldName "libcxx-$release.src" -Name "libcxxabi"
 
 $vercache = @{}
 $vercache["Version"] = $release
