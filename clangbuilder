@@ -4,7 +4,7 @@
 ClangbuilderDir=$(cd `dirname $0`; pwd)
 if [[ ! -f "$ClangbuilderDir/branch" ]]; then
   Branch="release_50"
-  Release="RELEASE_401/final"
+  Release="RELEASE_50/final"
 else
   source "$ClangbuilderDir/branch"
 fi
