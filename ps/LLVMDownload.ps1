@@ -8,9 +8,13 @@ Function DownloadFile {
         [String]$Name
     )
     Write-Host "Download $Name-$Version"
-    $UserAgent=[Microsoft.PowerShell.Commands.PSUserAgent]::Chrome 
+    if (Test-Path "$Name-$Version.tar.xz") {
+        Write-Host "source $Name-$Version.tar.gz exists"
+        return 
+    }
+    $UserAgent = [Microsoft.PowerShell.Commands.PSUserAgent]::Chrome 
     try {
-        Invoke-WebRequest -Uri "https://releases.llvm.org/$Version/$Name-$Version.src.tar.xz" -OutFile "$Name.tar.xz" -UserAgent $UserAgent -UseBasicParsing
+        Invoke-WebRequest -Uri "https://releases.llvm.org/$Version/$Name-$Version.src.tar.xz" -OutFile "$Name-$Version.tar.xz" -UserAgent $UserAgent -UseBasicParsing
     }
     catch {
         Write-Host -ForegroundColor Red "$_"
@@ -41,26 +45,29 @@ $ClangbuilderRoot = Split-Path -Parent $PSScriptRoot
 
 Push-Location $PWD
 
-if (!(Test-Path "$ClangbuilderRoot/out/rel")) {
-    New-Item -ItemType Directory -Force -Path "$ClangbuilderRoot/out/rel"
+$sourcedir = "$ClangbuilderRoot/out/rel"
+
+if (!(Test-Path $sourcedir)) {
+    New-Item -ItemType Directory -Force -Path $sourcedir
 }
 
-Set-Location "$ClangbuilderRoot/out/rel"
+
+Set-Location $sourcedir
 
 $revobj = Get-Content -Path "$ClangbuilderRoot/config/version.json" |ConvertFrom-Json
 $release = $revobj.Release
 
-if (Test-Path "$PWD/release.lock.json"  ) {
-    $freeze = Get-Content -Path "$PWD/release.lock.json" |ConvertFrom-Json
-    if ($freeze.Version -eq $release) {
+if (Test-Path "$sourcedir/release.lock.json") {
+    $freeze = Get-Content -Path "$sourcedir/release.lock.json" |ConvertFrom-Json
+    if ($freeze.Version -eq $release -and (Test-Path "$sourcedir/llvm")) {
         Write-Host "Use llvm download cache"
         Pop-Location
         return ;
     }
 }
 
-if (Test-Path "$PWD/llvm") {
-    Remove-Item -Force -Recurse "$PWD/llvm"
+if (Test-Path "$sourcedir/llvm") {
+    Remove-Item -Force -Recurse "$sourcedir/llvm"
 }
 
 Write-Host "LLVM release: $release"
@@ -73,15 +80,17 @@ DownloadFile -Version $release -Name "clang-tools-extra"
 DownloadFile -Version $release -Name "compiler-rt"
 DownloadFile -Version $release -Name "libcxx"
 DownloadFile -Version $release -Name "libcxxabi"
+DownloadFile -Version $release -Name "polly"
 
-UnpackFile -File "$PWD/llvm.tar.xz" -Path "." -OldName "llvm-$release.src" -Name "llvm"
-UnpackFile -File "$PWD/cfe.tar.xz" -Path "llvm/tools" -OldName "cfe-$release.src" -Name "clang"
-UnpackFile -File "$PWD/lld.tar.xz" -Path "llvm/tools" -OldName "lld-$release.src" -Name "lld"
-UnpackFile -File "$PWD/lldb.tar.xz" -Path "llvm/tools" -OldName "lldb-$release.src" -Name "lldb"
-UnpackFile -File "$PWD/clang-tools-extra.tar.xz" -Path "llvm/tools/clang/tools" -OldName "clang-tools-extra-$release.src" -Name "extra"
-UnpackFile -File "$PWD/compiler-rt.tar.xz" -Path "llvm/projects" -OldName "compiler-rt-$release.src" -Name "compiler-rt"
-UnpackFile -File "$PWD/libcxx.tar.xz" -Path "llvm/projects" -OldName "libcxx-$release.src" -Name "libcxx"
-UnpackFile -File "$PWD/libcxxabi.tar.xz" -Path "llvm/projects" -OldName "libcxx-$release.src" -Name "libcxxabi"
+UnpackFile -File "$PWD/llvm-$release.tar.xz" -Path "." -OldName "llvm-$release.src" -Name "llvm"
+UnpackFile -File "$PWD/cfe-$release.tar.xz" -Path "llvm/tools" -OldName "cfe-$release.src" -Name "clang"
+UnpackFile -File "$PWD/lld-$release.tar.xz" -Path "llvm/tools" -OldName "lld-$release.src" -Name "lld"
+UnpackFile -File "$PWD/lldb-$release.tar.xz" -Path "llvm/tools" -OldName "lldb-$release.src" -Name "lldb"
+UnpackFile -File "$PWD/openmp-$release.tar.xz" -Path "llvm/tools" -OldName "polly-$release.src" -Name "polly"
+UnpackFile -File "$PWD/clang-tools-extra-$release.tar.xz" -Path "llvm/tools/clang/tools" -OldName "clang-tools-extra-$release.src" -Name "extra"
+UnpackFile -File "$PWD/compiler-rt-$release.tar.xz" -Path "llvm/projects" -OldName "compiler-rt-$release.src" -Name "compiler-rt"
+UnpackFile -File "$PWD/libcxx-$release.tar.xz" -Path "llvm/projects" -OldName "libcxx-$release.src" -Name "libcxx"
+UnpackFile -File "$PWD/libcxxabi-$release.tar.xz" -Path "llvm/projects" -OldName "libcxxabi-$release.src" -Name "libcxxabi"
 
 $vercache = @{}
 $vercache["Version"] = $release
