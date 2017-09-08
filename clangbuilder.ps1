@@ -8,6 +8,7 @@ if ($null -ne $env:PREFIX) {
 }
 $CMakeArgs += " -DLLVM_ENABLE_ASSERTIONS=OFF -DCMAKE_C_COMPILER=`"$env:CC`" -DCMAKE_CXX_COMPILER=`"$env:CXX`""
 $CMakeArgs += " -DCMAKE_BUILD_TYPE=Release -DCLANG_REPOSITORY_STRING=`"clangbuilder.io`""
+$CMakeArgs += " -DLLVM_ENABLE_LLD=ON"
 
 if ($null -eq $env:CC) {
     $env:CC = "gcc"
