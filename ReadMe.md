@@ -1,3 +1,3 @@
 # Clangbuilder for Unix
 
-Clangbuilder unix shell script
+Clangbuilder unix pwsh script, Please install `PowerShell Core`.

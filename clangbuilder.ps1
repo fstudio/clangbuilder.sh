@@ -1,4 +1,4 @@
-#!/usr/bin/env powershell
+#!/usr/bin/env pwsh
 # build llvm on linux, mac use powershell
 
 $CMakeArgs = "-DCMAKE_BUILD_TYPE=Release"
@@ -45,5 +45,5 @@ try {
 }
 catch {
     Write-Host -ForegroundColor Red "$_"
-    exit 1    
+    exit 1
 }
